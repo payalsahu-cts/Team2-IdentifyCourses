@@ -1,0 +1,5 @@
+<suite name="All Test Suite">
+    <test verbose="2" preserve-order="true" name="C:/Users/2479380/IdeaProjects/IdentifyCourses">
+        <classes/>
+    </test>
+</suite>
