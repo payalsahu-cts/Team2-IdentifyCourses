@@ -1,5 +1,11 @@
-<suite name="All Test Suite">
-    <test verbose="2" preserve-order="true" name="C:/Users/2479380/IdeaProjects/IdentifyCourses">
-        <classes/>
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="IdentifyCourses Test Suite" parallel="methods" thread-count="3">
+
+    <test name="Identify Courses - All Scenarios" verbose="2" preserve-order="true">
+        <classes>
+            <class name="IdentifyCourses.runners.CucumberRunner"/>
+        </classes>
     </test>
+
 </suite>
