@@ -24,27 +24,36 @@ public class BaseTest {
 
     @BeforeMethod
     public void setUp() throws IOException {
+        // Read config.properties
         config = loadConfig();
+
+        // Launch browser from config
         String browser = config.getProperty("browser", "chrome");
         DriverFactory.initDriver(browser);
 
         WebDriver driver = DriverFactory.getDriver();
+
+        // Set implicit wait from config
         driver.manage().timeouts().implicitlyWait(
-            Duration.ofSeconds(Long.parseLong(config.getProperty("implicitWait", "10")))
+                Duration.ofSeconds(Long.parseLong(config.getProperty("implicitWait", "10")))
         );
 
+        // Set explicit wait (used by Members 3,4,5 in their page objects)
         wait = new WebDriverWait(driver,
-            Duration.ofSeconds(Long.parseLong(config.getProperty("explicitWait", "20")))
+                Duration.ofSeconds(Long.parseLong(config.getProperty("explicitWait", "20")))
         );
 
+        // Open Coursera
         driver.get(config.getProperty("baseURL"));
     }
 
     @AfterMethod
     public void tearDown(ITestResult result) {
+        // Take screenshot only when test fails
         if (ITestResult.FAILURE == result.getStatus()) {
             takeScreenshot(result.getName());
         }
+        // Quit browser after every test
         DriverFactory.quitDriver();
     }
 
@@ -55,9 +64,9 @@ public class BaseTest {
                 File src = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
                 String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
                 String destPath = config.getProperty("screenshotPath", "screenshots/")
-                    + testName + "_" + timestamp + ".png";
+                        + testName + "_" + timestamp + ".png";
                 File dest = new File(destPath);
-                dest.getParentFile().mkdirs();
+                dest.getParentFile().mkdirs();   // creates screenshots/ folder if missing
                 FileUtils.copyFile(src, dest);
                 System.out.println("Screenshot saved: " + destPath);
             } catch (IOException e) {

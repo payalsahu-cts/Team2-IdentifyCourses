@@ -7,6 +7,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 
 public class DriverFactory {
 
+    // ThreadLocal ensures each parallel thread gets its own browser
     private static final ThreadLocal<WebDriver> driver = new ThreadLocal<>();
 
     public static WebDriver getDriver() {
@@ -30,7 +31,7 @@ public class DriverFactory {
     public static void quitDriver() {
         if (driver.get() != null) {
             driver.get().quit();
-            driver.remove();
+            driver.remove();   // clears ThreadLocal to prevent memory leak
         }
     }
 }
