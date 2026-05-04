@@ -4,6 +4,7 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.NoSuchElementException;
 
 import java.time.Duration;
 
@@ -13,7 +14,7 @@ public class EnterpriseCampusPage {
     private WebDriverWait wait;
     private JavascriptExecutor js;
 
-    // "Ready to transform" form section — broad match since section text may vary
+    // Section anchor — broad match for the contact/request form heading
     private By readyToTransformSection = By.xpath(
         "//*[contains(text(),'Ready to transform')] | " +
         "//*[contains(text(),'Get in touch')] | " +
@@ -21,60 +22,21 @@ public class EnterpriseCampusPage {
         "//*[contains(text(),'Request info')]"
     );
 
-    // Actual form fields matching the real Coursera for Campus form (verified from UI)
-    private By firstNameField = By.xpath(
-        "//input[contains(@placeholder,'First Name')] | //input[@name='firstName'] | //input[@id='firstName']"
-    );
+    // Marketo form — exact IDs from the rendered HTML on coursera.org/campus
+    private By firstNameField       = By.id("FirstName");
+    private By lastNameField        = By.id("LastName");
+    private By emailField           = By.id("Email");
+    private By phoneField           = By.id("Phone");
+    private By institutionTypeSelect = By.id("Institution_Type__c");  // <select>
+    private By institutionNameField  = By.id("Company");
+    private By jobRoleSelect        = By.id("Title");                  // <select>
+    private By departmentSelect     = By.id("Department");             // <select>
+    private By needsSelect          = By.id("Self_Reported_Needs__c"); // <select>
+    private By countrySelect        = By.id("Country");               // <select>
 
-    private By lastNameField = By.xpath(
-        "//input[contains(@placeholder,'Last Name')] | //input[@name='lastName'] | //input[@id='lastName']"
-    );
+    private By submitButton = By.cssSelector("button.mktoButton[type='submit'], button[type='submit']");
 
-    private By emailField = By.xpath(
-        "//input[contains(@placeholder,'Work Email')] | //input[@type='email'] | " +
-        "//input[@name='email'] | //input[contains(@placeholder,'Email')]"
-    );
-
-    private By phoneField = By.xpath(
-        "//input[contains(@placeholder,'Phone Number')] | //input[@type='tel'] | " +
-        "//input[@name='phone'] | //input[contains(@placeholder,'Phone')]"
-    );
-
-    private By institutionTypeField = By.xpath(
-        "//input[contains(@placeholder,'Institution Type')] | //input[@name='institutionType'] | " +
-        "//select[contains(@placeholder,'Institution Type')] | //select[@name='institutionType']"
-    );
-
-    private By institutionNameField = By.xpath(
-        "//input[contains(@placeholder,'Institution Name')] | //input[@name='institutionName'] | " +
-        "//input[@name='company'] | //input[contains(@placeholder,'Institution')]"
-    );
-
-    private By jobRoleField = By.xpath(
-        "//input[contains(@placeholder,'Job Role')] | //input[@name='jobRole'] | " +
-        "//input[@name='jobTitle'] | //input[contains(@placeholder,'Job')]"
-    );
-
-    private By departmentField = By.xpath(
-        "//input[contains(@placeholder,'Department')] | //input[@name='department']"
-    );
-
-    private By needsField = By.xpath(
-        "//input[contains(@placeholder,'Which best describes')] | " +
-        "//select[contains(@placeholder,'Which best describes')] | " +
-        "//input[@name='needs'] | //select[@name='needs']"
-    );
-
-    private By countryField = By.xpath(
-        "//input[contains(@placeholder,'Country')] | //select[@name='country'] | " +
-        "//select[@id='country'] | //input[@name='country']"
-    );
-
-    private By submitButton = By.xpath(
-        "//button[normalize-space()='Submit'] | //button[@type='submit'] | //input[@type='submit']"
-    );
-
-    // Error message locators
+    // Error message locators — covers both ARIA alerts and Marketo inline validation
     private By emailErrorMessage = By.xpath(
         "//*[@role='alert'] | " +
         "//span[contains(@class,'error') or contains(@class,'invalid')] | " +
@@ -95,7 +57,6 @@ public class EnterpriseCampusPage {
             Thread.sleep(1200);
             System.out.println("[Scroll] Scrolled to form section via element.");
         } catch (Exception e) {
-            // Fallback: scroll toward bottom where contact forms typically live
             js.executeScript("window.scrollTo({top: document.body.scrollHeight * 0.80, behavior: 'smooth'});");
             try { Thread.sleep(1200); } catch (InterruptedException ignored) {}
             System.out.println("[Scroll] Scrolled to 80% of page (fallback).");
@@ -113,14 +74,61 @@ public class EnterpriseCampusPage {
         }
     }
 
+    private void selectDropdownOption(By locator, String value, String fieldName) {
+        try {
+            WebElement el = wait.until(ExpectedConditions.elementToBeClickable(locator));
+            js.executeScript("arguments[0].scrollIntoView({block:'center'});", el);
+            Select select = new Select(el);
+            try {
+                select.selectByVisibleText(value);
+                System.out.println("[Dropdown] '" + fieldName + "' set to: " + value);
+            } catch (NoSuchElementException e) {
+                // Partial case-insensitive match
+                select.getOptions().stream()
+                    .filter(o -> o.getText().toLowerCase().contains(value.toLowerCase()))
+                    .findFirst()
+                    .ifPresentOrElse(
+                        o -> {
+                            select.selectByVisibleText(o.getText());
+                            System.out.println("[Dropdown] '" + fieldName + "' partial-matched '" + value + "' -> '" + o.getText() + "'");
+                        },
+                        () -> System.out.println("[WARN] Dropdown '" + fieldName + "': no option containing '" + value + "' found, skipping.")
+                    );
+            }
+        } catch (Exception e) {
+            System.out.println("[INFO] Dropdown '" + fieldName + "' not found or not interactable, skipping. (" + e.getMessage() + ")");
+        }
+    }
+
     public void fillFirstName(String value)       { fillField(firstNameField,      value, "First Name"); }
-    public void fillLastName(String value)        { fillField(lastNameField,       value, "Last Name"); }
-    public void fillPhone(String value)           { fillField(phoneField,          value, "Phone Number"); }
-    public void fillInstitutionType(String value) { fillField(institutionTypeField, value, "Institution Type"); }
-    public void fillInstitutionName(String value) { fillField(institutionNameField, value, "Institution Name"); }
-    public void fillJobRole(String value)         { fillField(jobRoleField,        value, "Job Role"); }
-    public void fillDepartment(String value)      { fillField(departmentField,     value, "Department"); }
-    public void fillNeeds(String value)           { fillField(needsField,          value, "Which best describes your needs"); }
+    public void fillLastName(String value)         { fillField(lastNameField,       value, "Last Name"); }
+    public void fillPhone(String value)            { fillField(phoneField,          value, "Phone Number"); }
+    public void fillInstitutionName(String value)  { fillField(institutionNameField, value, "Institution Name"); }
+
+    /** id="Institution_Type__c" — options: University/4 Year College, 2 Year College, Graduate or Professional School, Ministry of Education, Other */
+    public void fillInstitutionType(String value) {
+        selectDropdownOption(institutionTypeSelect, value, "Institution Type");
+    }
+
+    /** id="Title" — options: President/Provost, Chancellor/Rector, Vice-Chancellor/Vice-Rector, Vice-President/Vice-Provost, Registrar, CEO, COO/CIO, Dean, Department Head, Director, Professor, Student */
+    public void fillJobRole(String value) {
+        selectDropdownOption(jobRoleSelect, value, "Job Role");
+    }
+
+    /** id="Department" — options: Academic Affairs, Career Services, Continuing Education, Enrollment Management, Executive Leadership, International, Strategic Planning, Student Affairs, Teaching/Faculty/Research, Other */
+    public void fillDepartment(String value) {
+        selectDropdownOption(departmentSelect, value, "Department");
+    }
+
+    /** id="Self_Reported_Needs__c" — options: Get in touch with sales, Existing customer support, Learner Support, Courses for myself, Other */
+    public void fillNeeds(String value) {
+        selectDropdownOption(needsSelect, value, "Needs");
+    }
+
+    /** id="Country" — standard country SELECT */
+    public void fillCountry(String value) {
+        selectDropdownOption(countrySelect, value, "Country");
+    }
 
     public void fillEmail(String value) {
         WebElement field = wait.until(ExpectedConditions.elementToBeClickable(emailField));
@@ -135,18 +143,6 @@ public class EnterpriseCampusPage {
         field.clear();
         js.executeScript("arguments[0].value = '';", field);
         field.sendKeys(value);
-    }
-
-    public void fillCountry(String value) {
-        try {
-            WebElement field = wait.until(ExpectedConditions.elementToBeClickable(countryField));
-            js.executeScript("arguments[0].scrollIntoView({block:'center'});", field);
-            // Try as select dropdown first, then as text input
-            try { new Select(field).selectByVisibleText(value); }
-            catch (Exception ex) { field.clear(); field.sendKeys(value); }
-        } catch (Exception e) {
-            System.out.println("[INFO] Country field not found, skipping.");
-        }
     }
 
     public void clickSubmit() {

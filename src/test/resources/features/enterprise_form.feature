@@ -18,9 +18,9 @@ Feature: Coursera Enterprise Campus Form Interaction
       | phone           | 9876543210              |
       | institutionType | University              |
       | institutionName | State University        |
-      | jobRole         | IT Administrator        |
-      | department      | Information Technology  |
-      | needs           | Campus                  |
+      | jobRole         | Director                |
+      | department      | Academic Affairs        |
+      | needs           | Get in touch with sales |
       | country         | India                   |
     And I replace the email field with invalid email "testinvalid.com"
     And I click the Submit button

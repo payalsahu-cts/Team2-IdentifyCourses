@@ -17,7 +17,7 @@ import org.testng.annotations.DataProvider;
 public class CucumberRunner extends AbstractTestNGCucumberTests {
 
     @Override
-    @DataProvider(parallel = false)   // sequential — one scenario at a time, member by member
+    @DataProvider(parallel = true)
     public Object[][] scenarios() {
         return super.scenarios();
     }

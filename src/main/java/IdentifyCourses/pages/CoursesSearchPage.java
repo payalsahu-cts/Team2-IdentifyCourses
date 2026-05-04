@@ -196,21 +196,63 @@ public class CoursesSearchPage {
     }
 
     /**
-     * Selects an option from an open dropdown by matching its visible text exactly.
-     * Covers role=option, role=menuitem, label, li, and class-based option containers.
+     * Selects a filter option from an open dropdown panel.
+     *
+     * Coursera filter panels use checkbox+label pairs. The important rules:
+     *  1. Use regular .click() on the <label> — JS click bypasses browser checkbox
+     *     toggle logic and the checkbox never shows as checked visually.
+     *  2. Check isSelected() first to avoid toggling an already-checked option off.
+     *  3. Fall back to role-based / li options for non-checkbox dropdowns.
      */
     private void selectDropdownOption(String optionText) {
-        By loc = By.xpath(
+        // Strategy 1: label containing a checkbox (Coursera filter panel style)
+        By labelLoc = By.xpath(
+                "//label[normalize-space()='" + optionText + "' "
+                + "or .//span[normalize-space()='" + optionText + "']]"
+        );
+        try {
+            WebElement label = new WebDriverWait(driver(), Duration.ofSeconds(8))
+                    .until(ExpectedConditions.elementToBeClickable(labelLoc));
+            try {
+                WebElement cb = label.findElement(By.xpath(".//input[@type='checkbox']"));
+                if (cb.isSelected()) {
+                    System.out.println("[Filter] '" + optionText + "' already checked, skipping.");
+                    return;
+                }
+            } catch (NoSuchElementException ignored) { }
+            // Regular browser click so the checkbox checked-state updates correctly
+            label.click();
+            System.out.println("[Filter] Clicked label for: " + optionText);
+            return;
+        } catch (Exception ignored) { }
+
+        // Strategy 2: standalone checkbox whose value or aria-label matches
+        By cbLoc = By.xpath(
+                "//input[@type='checkbox'][@value='" + optionText + "' "
+                + "or @aria-label='" + optionText + "' "
+                + "or @id=(//label[normalize-space()='" + optionText + "']/@for)]"
+        );
+        try {
+            WebElement cb = new WebDriverWait(driver(), Duration.ofSeconds(5))
+                    .until(ExpectedConditions.elementToBeClickable(cbLoc));
+            if (!cb.isSelected()) {
+                cb.click();
+                System.out.println("[Filter] Clicked checkbox for: " + optionText);
+            }
+            return;
+        } catch (Exception ignored) { }
+
+        // Strategy 3: role=option / role=menuitem / li / div.option (non-checkbox menus)
+        By roleLoc = By.xpath(
                 "//*[@role='option' or @role='menuitem'][normalize-space()='" + optionText + "'] | "
-                + "//label[normalize-space()='" + optionText + "' "
-                + "  or .//span[normalize-space()='" + optionText + "']] | "
                 + "//li[normalize-space()='" + optionText + "'] | "
                 + "//div[contains(@class,'option') or contains(@class,'item') or contains(@class,'Option')]"
                 + "[normalize-space()='" + optionText + "']"
         );
         WebElement option = new WebDriverWait(driver(), Duration.ofSeconds(8))
-                .until(ExpectedConditions.elementToBeClickable(loc));
+                .until(ExpectedConditions.elementToBeClickable(roleLoc));
         jsClick(option);
+        System.out.println("[Filter] Clicked role-based option for: " + optionText);
     }
 
     private void applyFilterViaUrl(String paramName, String paramValue) {
