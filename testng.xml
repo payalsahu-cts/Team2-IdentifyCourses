@@ -10,6 +10,14 @@
         </classes>
     </test>
 
+    <!-- Member 2 (Vaishnavi Asare): Language Learning Filter Analysis (Scenario 2) -->
+    <test name="Member2 - Language Learning" verbose="2" preserve-order="true">
+        <parameter name="cucumber.filter.tags" value="@languagelearning"/>
+        <classes>
+            <class name="IdentifyCourses.runners.CucumberRunner"/>
+        </classes>
+    </test>
+
     <!-- Member 5 (Shoyab Khan): Enterprise Campus Form (Scenario 3) -->
     <test name="Member5 - Enterprise Campus Form" verbose="2" preserve-order="true">
         <parameter name="cucumber.filter.tags" value="@enterprise"/>
