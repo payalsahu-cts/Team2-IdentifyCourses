@@ -28,6 +28,8 @@
 - [Running the Tests](#-running-the-tests)
 - [Expected Output](#-expected-output)
 - [Sample Results](#-sample-results)
+- [Contributors](#-contributors)
+
 
 ---
 
@@ -376,6 +378,21 @@ Test Status  : PASSED ✅
 ==============================================
 ```
 
+---
+
+## 👥 Contributors
+ 
+Thanks to all the collaborators who built and contributed to this project:
+ 
+| # | GitHub Profile | Role |
+|---|---------------|------|
+| 1 | [![ArmanShaikh04](https://img.shields.io/badge/ArmanShaikh04-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/ArmanShaikh04) | Collaborator |
+| 2 | [![khushi-2480122](https://img.shields.io/badge/khushi--2480122-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/khushi-2480122) | Collaborator |
+| 3 | [![Mayur-Cognizant-CTC](https://img.shields.io/badge/Mayur--Cognizant--CTC-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/Mayur-Cognizant-CTC) | Collaborator |
+| 4 | [![shoyabKhan05](https://img.shields.io/badge/shoyabKhan05-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/shoyabKhan05) | Collaborator |
+| 5 | [![VaishnaviAsare](https://img.shields.io/badge/VaishnaviAsare-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/VaishnaviAsare) | Collaborator |
+| 6 | [![payalsahu-cts](https://img.shields.io/badge/payalsahu--cts-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/payalsahu-cts) | Collaborator |
+ 
 ---
 
 
